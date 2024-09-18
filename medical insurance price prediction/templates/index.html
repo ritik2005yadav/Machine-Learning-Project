@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insurance Price Prediction</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f0f8ff; /* Light blue background */
+            color: #333; /* Dark text color */
+        }
+        .container {
+            margin-top: 50px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #ffffff; /* White background for the form */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #007bff; /* Blue color for headings */
+        }
+        .form-group label {
+            font-weight: bold;
+        }
+        .btn-primary {
+            background-color: #007bff; /* Blue button */
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+        }
+        .result {
+            font-size: 1.5em;
+            color: #28a745; /* Green color for the result */
+        }
+        .error {
+            color: #dc3545; /* Red color for errors */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="text-center">Insurance Price Prediction</h2>
+        <form id="predictForm">
+            <div class="form-group">
+                <label for="age">Age:</label>
+                <input type="number" id="age" name="age" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="sex">Sex (0 for Male, 1 for Female):</label>
+                <input type="number" id="sex" name="sex" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="bmi">BMI:</label>
+                <input type="number" id="bmi" name="bmi" step="0.1" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="children">Number of Children:</label>
+                <input type="number" id="children" name="children" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="smoker">Smoker (1 for Yes, 0 for No):</label>
+                <input type="number" id="smoker" name="smoker" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="region">Region (0 for Northeast, 1 for Northwest, 2 for Southeast, 3 for Southwest):</label>
+                <input type="number" id="region" name="region" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Predict</button>
+        </form>
+        <h2 class="text-center mt-4">Predicted Insurance Price: $<span id="prediction" class="result"></span></h2>
+        <h2 class="text-center mt-4"><span id="error" class="error"></span></h2>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        document.getElementById("predictForm").addEventListener("submit", function(event){
+            event.preventDefault();  // Prevent default form submission
+
+            let age = document.getElementById("age").value;
+            let sex = document.getElementById("sex").value;
+            let bmi = document.getElementById("bmi").value;
+            let children = document.getElementById("children").value;
+            let smoker = document.getElementById("smoker").value;
+            let region = document.getElementById("region").value;
+
+            let features = [parseFloat(age), parseInt(sex), parseFloat(bmi), parseInt(children), parseInt(smoker), parseInt(region)];
+
+            // Clear previous results
+            document.getElementById("prediction").textContent = "";
+            document.getElementById("error").textContent = "";
+
+            fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ features: features }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.prediction) {
+                    document.getElementById("prediction").textContent = data.prediction;
+                } else if (data.error) {
+                    document.getElementById("error").textContent = "Error: " + data.error;
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                document.getElementById("error").textContent = "An error occurred";
+            });
+        });
+    </script>
+</body>
+</html>
